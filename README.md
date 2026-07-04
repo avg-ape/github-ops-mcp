@@ -5,7 +5,7 @@ An MCP server that provides operational tooling over the GitHub API — issue tr
 ## Quick Start
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/github-ops-mcp.git
+git clone https://github.com/avg-ape/github-ops-mcp.git
 cd github-ops-mcp
 python3 -m venv .venv
 source .venv/bin/activate
