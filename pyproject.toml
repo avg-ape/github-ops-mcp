@@ -1,0 +1,27 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "github-ops-mcp"
+version = "0.1.0"
+description = "MCP server for GitHub operational workflows — issue triage, PR monitoring, repo health audits, and access reviews"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+dependencies = [
+    "mcp>=1.28",
+    "httpx>=0.28",
+    "pydantic>=2.0",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+    "respx>=0.22",
+]
+
+[project.scripts]
+github-ops-mcp = "github_ops_mcp.server:main"
