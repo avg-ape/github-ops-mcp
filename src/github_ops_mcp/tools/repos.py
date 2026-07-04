@@ -33,6 +33,12 @@ async def _check_branch_protection(
                 passed=False,
                 detail=f"No branch protection on {branch}",
             )
+        if e.status_code in (401, 403):
+            return HealthCheck(
+                name="Branch Protection",
+                passed=False,
+                detail="Cannot check — requires authenticated token with repo scope",
+            )
         raise
 
 
