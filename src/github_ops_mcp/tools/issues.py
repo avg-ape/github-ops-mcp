@@ -132,7 +132,7 @@ async def bulk_label_issues(
     filter_text: str,
     dry_run: bool = True,
 ) -> BulkLabelResult:
-    """Apply ``label`` to all open issues whose title contains ``filter_text``."""
+    """Apply ``label`` to all open issues whose title or body contains ``filter_text``."""
     raw_items = await client.get_all(
         f"/repos/{owner}/{repo}/issues",
         params={"state": "open", "per_page": 100},
@@ -144,7 +144,9 @@ async def bulk_label_issues(
     for r in raw_items:
         if not _is_issue(r):
             continue
-        if filter_lower not in r["title"].lower():
+        title = r.get("title", "").lower()
+        body = (r.get("body") or "").lower()
+        if filter_lower not in title and filter_lower not in body:
             continue
         issue = _parse_issue(r)
         matched.append(issue)

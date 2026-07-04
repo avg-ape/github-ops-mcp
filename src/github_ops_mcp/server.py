@@ -1,7 +1,10 @@
+from dotenv import load_dotenv
 from mcp.server.fastmcp import FastMCP
 
 from github_ops_mcp.github_client import GitHubClient, GitHubAPIError
 from github_ops_mcp.tools import issues, pulls, repos, teams
+
+load_dotenv()
 
 mcp = FastMCP("github-ops")
 
@@ -115,11 +118,11 @@ async def repo_health_audit(owner: str, repo: str) -> str:
 
 
 @mcp.tool()
-async def repo_compare(owner: str, repos_list: list[str]) -> str:
+async def repo_compare(owner: str, repos: list[str]) -> str:
     """Compare health audit results across multiple repos to find inconsistencies."""
     client = GitHubClient()
     try:
-        comparison = await repos.repo_compare(client, owner, repos_list)
+        comparison = await repos.repo_compare(client, owner, repos)
         return str(comparison)
     except GitHubAPIError as e:
         return _error(e.message)

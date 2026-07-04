@@ -35,6 +35,7 @@ class GitHubClient:
         self._client = httpx.AsyncClient(
             base_url=self.BASE_URL,
             headers=headers,
+            timeout=httpx.Timeout(30.0),
         )
 
         self.rate_limit_remaining: int | None = None

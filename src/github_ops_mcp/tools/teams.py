@@ -23,10 +23,11 @@ async def team_access_review(
     readers: list[UserPermission] = []
 
     if repo:
-        collaborators = await client.get_all(
-            f"/repos/{owner}/{repo}/collaborators",
-            params={"per_page": 100},
-        )
+        params: dict[str, str | int] = {"per_page": 100}
+        endpoint = f"/repos/{owner}/{repo}/collaborators"
+        if team:
+            endpoint = f"/orgs/{owner}/teams/{team}/members"
+        collaborators = await client.get_all(endpoint, params=params)
         for user in collaborators:
             login = user.get("login", "unknown")
             perms = user.get("permissions", {})
@@ -36,7 +37,8 @@ async def team_access_review(
                 permission = "write"
             else:
                 permission = "read"
-            up = UserPermission(login=login, permission=permission, source="direct")
+            source = f"team:{team}" if team else "direct"
+            up = UserPermission(login=login, permission=permission, source=source)
             if permission == "admin":
                 admins.append(up)
             elif permission == "write":

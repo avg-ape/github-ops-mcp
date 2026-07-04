@@ -34,19 +34,20 @@ def _make_issue(
     assignee: str | None = None,
     milestone: str | None = None,
     days_old: int = 5,
+    body: str | None = None,
 ) -> dict:
     """Build a minimal GitHub API issue dict."""
     updated = NOW - timedelta(days=days_old)
     return {
         "number": number,
         "title": title,
+        "body": body,
         "html_url": f"https://github.com/owner/repo/issues/{number}",
         "created_at": (NOW - timedelta(days=days_old + 1)).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "updated_at": updated.strftime("%Y-%m-%dT%H:%M:%SZ"),
         "labels": [{"name": lbl} for lbl in (labels or [])],
         "assignee": {"login": assignee} if assignee else None,
         "milestone": {"title": milestone} if milestone else None,
-        # No "pull_request" key → treated as a real issue
     }
 
 
@@ -217,6 +218,28 @@ async def test_bulk_label_dry_run_matches():
     assert {i.number for i in result.affected} == {30, 32}
     assert result.label == "bug"
     assert result.filter_text == "fix"
+
+
+@pytest.mark.asyncio
+async def test_bulk_label_matches_body():
+    """filter_text should match against issue body, not just title."""
+    issues = [
+        _make_issue(50, "Generic title", body="Getting a timeout error on login page"),
+        _make_issue(51, "Another issue", body="Everything works fine"),
+    ]
+
+    client = GitHubClient(token="test-token")
+    with respx.mock:
+        respx.get("https://api.github.com/repos/owner/repo/issues").mock(
+            return_value=httpx.Response(200, json=issues, headers=RATE_LIMIT_HEADERS)
+        )
+        result = await bulk_label_issues(
+            client, "owner", "repo", label="bug/perf", filter_text="timeout", dry_run=True
+        )
+    await client.close()
+
+    assert result.count == 1
+    assert result.affected[0].number == 50
 
 
 @pytest.mark.asyncio

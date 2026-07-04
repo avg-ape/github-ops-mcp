@@ -141,19 +141,10 @@ async def repo_health_audit(
             HealthCheck(name="Security Policy", passed=False, detail="Could not retrieve community profile")
         )
 
-    # Default branch name check
-    if default_branch == "main":
-        checks.append(
-            HealthCheck(name="Default Branch", passed=True, detail=f"Default branch is '{default_branch}'")
-        )
-    else:
-        checks.append(
-            HealthCheck(
-                name="Default Branch",
-                passed=False,
-                detail=f"Default branch is '{default_branch}' (consider renaming to 'main')",
-            )
-        )
+    # Default branch name check (informational — not a pass/fail judgment)
+    checks.append(
+        HealthCheck(name="Default Branch", passed=True, detail=f"Default branch is '{default_branch}'")
+    )
 
     total = len(checks)
     passed_count = sum(1 for c in checks if c.passed)
